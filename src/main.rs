@@ -53,45 +53,42 @@ impl Booking {
 
 fn main() {
   let matrix: Vec<Booking> = build_schedule_matrix(10, String::from("2023-03-10"));
-  // println!("[");
+  println!("-------------------------------------------------------------------------------------------------------------------------------------");
   for booking in matrix {
-    println!("Booking {} -> {}: Slots count: {}", booking.id, booking.date, booking.slots_count());
+    // println!("Booking {} -> {}: Slots count: {}", booking.id, booking.date, booking.slots_count());
     for slot in booking.available_slots() {
       let blocked_string = match slot.blocked() {
-        true => String::from("blocked"),
-        false => String::from("free")
+        true => String::from("B"),
+        false => String::from("F")
       };
-      print!("[{} - {}] ", slot.hour, blocked_string);
+      print!("[{} - {}]|", slot.hour, blocked_string);
     }
-    println!("\r\n")
+    println!("");
+    println!("-------------------------------------------------------------------------------------------------------------------------------------");
+    
   }
-  // println!("]");
 }
 
 fn build_schedule_matrix(mut bookings_count: u32, date: String) -> Vec<Booking> {
   let mut bookings: Vec<Booking> = Vec::new();
 
   while bookings_count > 0 {
-    let mut day: u32 = 1;
     let mut slots: Vec<Slot> = Vec::new();
-    // while (day < 30) {
-      let mut hour: u32 = 7;
-      while hour < 18 {
-        let time: String = match hour {
-          ..= 9 => format!("0{}:00", hour),
-          _ => format!("{}:00", hour.to_string())
-        };
-        
-        let slot_date: String = format!("{} {}", date, time);
-        let slot: Slot = Slot { slot_date, order: None, hour: time };
-        slots.push(slot);
-        hour += 1;
-      }
+    let mut hour: u32 = 7;
+    while hour < 18 {
+      let time: String = match hour {
+        ..= 9 => format!("0{}:00", hour),
+        _ => format!("{}:00", hour.to_string())
+      };
+      
+      let slot_date: String = format!("{} {}", date, time);
+      let slot: Slot = Slot { slot_date, order: None, hour: time };
+      slots.push(slot);
+      hour += 1;
+    }
 
-      let booking: Booking = Booking { id: bookings_count, date: date.clone(), slots: slots };
-      bookings.push(booking);
-      // day += 1;
-    // } 
+    let booking: Booking = Booking { id: bookings_count, date: date.clone(), slots: slots };
+    bookings.push(booking);
 
     bookings_count -= 1;
   }
