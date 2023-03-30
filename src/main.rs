@@ -1,3 +1,29 @@
+use chrono::{NaiveDateTime};
+use chrono::format::ParseError;
+
+fn main() {
+  let matrix: Vec<Booking> = build_schedule_matrix(10, String::from("2023-03-10"));
+  println!("-------------------------------------------------------------------------------------------------------------------------------------");
+  for booking in matrix {
+    // println!("Booking {} -> {}: Slots count: {}", booking.id, booking.date, booking.slots_count());
+    for slot in booking.available_slots() {
+      let blocked_string = match slot.blocked() {
+        true => String::from("B"),
+        false => String::from("F")
+      };
+      print!("[{} - {}]|", slot.hour(), blocked_string);
+    }
+    println!("");
+    println!("-------------------------------------------------------------------------------------------------------------------------------------");
+    
+  }
+}
+
+enum OrderType {
+  VACCINES,
+  EXAMS
+}
+
 struct Product {
   id: u32,
   name: String
@@ -14,14 +40,13 @@ struct Order {
 }
 
 impl Order {
-  fn orderType() -> String {
-    return String::from("vaccines");
+  fn order_type() -> OrderType {
+    return OrderType::VACCINES;
   }
 }
 
 struct Slot {
-  slot_date: String,
-  hour: String,
+  slot_date: NaiveDateTime,
   order: Option<Order>
 }
 
@@ -30,9 +55,9 @@ impl Slot {
     return self.order.is_some();
   }
 
-  // fn hour() -> String {
-  //   return String::from("09:00");
-  // }
+  fn hour(&self) -> String {
+    return self.slot_date.format("%H:%M").to_string();
+  }
 }
 
 struct Booking {
@@ -51,24 +76,6 @@ impl Booking {
   }
 }
 
-fn main() {
-  let matrix: Vec<Booking> = build_schedule_matrix(10, String::from("2023-03-10"));
-  println!("-------------------------------------------------------------------------------------------------------------------------------------");
-  for booking in matrix {
-    // println!("Booking {} -> {}: Slots count: {}", booking.id, booking.date, booking.slots_count());
-    for slot in booking.available_slots() {
-      let blocked_string = match slot.blocked() {
-        true => String::from("B"),
-        false => String::from("F")
-      };
-      print!("[{} - {}]|", slot.hour, blocked_string);
-    }
-    println!("");
-    println!("-------------------------------------------------------------------------------------------------------------------------------------");
-    
-  }
-}
-
 fn build_schedule_matrix(mut bookings_count: u32, date: String) -> Vec<Booking> {
   let mut bookings: Vec<Booking> = Vec::new();
 
@@ -76,13 +83,12 @@ fn build_schedule_matrix(mut bookings_count: u32, date: String) -> Vec<Booking> 
     let mut slots: Vec<Slot> = Vec::new();
     let mut hour: u32 = 7;
     while hour < 18 {
-      let time: String = match hour {
-        ..= 9 => format!("0{}:00", hour),
-        _ => format!("{}:00", hour.to_string())
-      };
+      let slot_date: NaiveDateTime = match hour {
+        ..= 9 => NaiveDateTime::parse_from_str(&format!("{} 0{}:00", date, hour), "%Y-%m-%d %H:%M"),
+        _ => NaiveDateTime::parse_from_str(&format!("{} {}:00", date, hour), "%Y-%m-%d %H:%M")
+      }.unwrap();
       
-      let slot_date: String = format!("{} {}", date, time);
-      let slot: Slot = Slot { slot_date, order: None, hour: time };
+      let slot: Slot = Slot { slot_date, order: None };
       slots.push(slot);
       hour += 1;
     }
