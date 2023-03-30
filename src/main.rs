@@ -1,14 +1,11 @@
 mod booking;
 use booking::{ScheduleBooking, Slot};
-// use booking::schedule_booking::ScheduleBooking;
-// use booking::slot::Slot;
 use chrono::{NaiveDateTime};
 
 fn main() {
   let matrix: Vec<ScheduleBooking> = build_schedule_matrix(10, String::from("2023-03-10"));
   println!("-------------------------------------------------------------------------------------------------------------------------------------");
   for booking in matrix {
-    // println!("ScheduleBooking {} -> {}: Slots count: {}", booking.id, booking.date, booking.slots_count());
     for slot in booking.available_slots() {
       let blocked_string = match slot.blocked() {
         true => String::from("B"),
